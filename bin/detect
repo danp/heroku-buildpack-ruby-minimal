@@ -1,0 +1,12 @@
+#!/bin/sh
+
+BUILD_DIR="$1"
+
+cd "$BUILD_DIR"
+
+if [ -e Gemfile ]; then
+    echo "Ruby"
+else
+    echo no
+    exit 1
+fi

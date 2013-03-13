@@ -1,0 +1,107 @@
+#!/bin/bash
+
+set -e
+set -o pipefail
+
+VENDOR_URL="https://s3.amazonaws.com/heroku-buildpack-ruby"
+BUNDLER_VERSION="1.3.2"
+
+BUILD_DIR="$1"
+CACHE_DIR="$2"
+
+say() {
+    echo "-----> $*"
+}
+
+indent() {
+    sed -u 's/^/       /'
+}
+
+unpack_url() {
+    url="$1"
+    path="$2"
+
+    mkdir -p "$path"
+
+    if ! curl --fail --retry 3 --silent -o - "$url" | tar -C "$path" -zxf -; then
+        echo "Fetching and unpacking \"$url\" to \"$path\" failed"
+        exit 1
+    fi
+}
+
+cache_load() {
+    if [ -e "$CACHE_DIR/$1" ]; then
+        mkdir -p "$1"
+        cp -a "$CACHE_DIR/$1/." "$1"
+    fi
+}
+
+cache_store() {
+    if [ -e "$1" ]; then
+        rm -rf "$CACHE_DIR/$1"
+        mkdir -p "$CACHE_DIR/$1"
+        cp -a "$1/." "$CACHE_DIR/$1"
+w    fi
+}
+
+mkdir -p "$BUILD_DIR"
+mkdir -p "$CACHE_DIR"
+cd "$BUILD_DIR"
+
+if [ ! -e Gemfile.lock ]; then
+    echo "No Gemfile.lock. Check it into your repository."
+    exit 1
+fi
+
+if [ -e vendor/bundle ]; then
+    echo "Don't check in your vendor/bundle directory."
+    rm -rf vendor/bundle
+fi
+
+if [ -e .ruby-version ]; then
+    ruby_version="$(< .ruby-version)"
+    if echo "$ruby_version" | egrep -q '^[[:digit:]]'; then
+        ruby_version="ruby-$ruby_version"
+    fi
+else
+    ruby_version="ruby-2.0.0"
+fi
+
+say "Using $ruby_version"
+unpack_url "$VENDOR_URL/$ruby_version.tgz" "vendor/$ruby_version"
+ruby_exe="$(find vendor/$ruby_version -name ruby -type f)"
+bundle_base="$("$ruby_exe" -e "require 'rbconfig';puts \"vendor/bundle/#{RUBY_ENGINE}/#{RbConfig::CONFIG['ruby_version']}\"")"
+mkdir .profile.d
+cat > .profile.d/ruby.sh <<EOF
+export GEM_PATH="\$HOME/$bundle_base:\$GEM_PATH"
+export LANG=\${LANG:-en_US.UTF-8}
+export PATH="\$HOME/bin:\$HOME/$bundle_base/bin:\$HOME/vendor/$ruby_version/bin:\$PATH"
+export RACK_ENV=\${RACK_ENV:-production}
+EOF
+export GEM_PATH="$BUILD_DIR/$bundle_base:$GEM_PATH"
+export PATH="$BUILD_DIR/bin:$BUILD_DIR/$bundle_base/bin:$BUILD_DIR/vendor/$ruby_version/bin:$PATH"
+
+say "Using bundler $BUNDLER_VERSION"
+cache_load .bundle
+cache_load vendor
+mkdir -p vendor/buildpack
+"$ruby_exe" -v > vendor/buildpack/ruby_v.new
+if [ -e vendor/buildpack/ruby_v ] && ! cmp --quiet vendor/buildpack/ruby_v{,.new}; then
+    echo "ruby version change detected, clearing cached bundle" | indent
+    echo "old: $(< vendor/buildpack/ruby_v)" | indent
+    echo "new: $(< vendor/buildpack/ruby_v.new)" | indent
+    rm -rf vendor/bundle
+fi
+mv vendor/buildpack/ruby_v{.new,}
+unpack_url "$VENDOR_URL/bundler-$BUNDLER_VERSION.tgz" "$bundle_base"
+
+say "Installing dependencies"
+bundle install --without development:test --path vendor/bundle --no-clean | indent
+rm -rf "$bundle_base/doc" "$bundle_base/bundler-$BUNDLER_VERSION.gem"
+cache_store .bundle
+cache_store vendor/buildpack
+cache_store vendor/bundle
+rm -rf "$bundle_base/cache"
+
+say "Cleaning cache"
+bundle clean | indent
