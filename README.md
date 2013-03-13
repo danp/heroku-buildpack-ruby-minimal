@@ -33,6 +33,7 @@ It supports the same ruby versions as the official ruby buildpack, except for jr
 * add default addons: the official ruby buildpack will add a database if you have `pg` in your bundle
 * specify default processes types: the official ruby buildpack will set defaults for `web`, `rake`, and `console`
 * rails assets stuff: the official ruby buildpack will install node if necessary and try to run `rake assets:precompile`
+* rails plugins: the official ruby buildpack will install plugins for logging, static asset serving, etc.
 * `database.yml`: the official ruby buildpack will set up `database.yml` for you, reading from `$DATABASE_URL`
 * anything related to syck/psych
 * jruby (yet): it doesn't install a JVM if you specify jruby in your `Gemfile`
