@@ -58,7 +58,7 @@ if [ -e vendor/bundle ]; then
     rm -rf vendor/bundle
 fi
 
-say "Using bundler $BUNDLER_VERSION"
+say "Using bundler-$BUNDLER_VERSION"
 bundler_tmp="$(mktemp -d bundler.XXXXXXXX)"
 unpack_url "$VENDOR_URL/bundler-$BUNDLER_VERSION.tgz" "$bundler_tmp"
 bundle_platform_ruby="$(GEM_PATH="$bundler_tmp" "$bundler_tmp/gems/bundler-$BUNDLER_VERSION/bin/bundle_ruby")"
