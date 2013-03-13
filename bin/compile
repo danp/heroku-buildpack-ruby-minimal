@@ -41,7 +41,7 @@ cache_store() {
         rm -rf "$CACHE_DIR/$1"
         mkdir -p "$CACHE_DIR/$1"
         cp -a "$1/." "$CACHE_DIR/$1"
-w    fi
+    fi
 }
 
 mkdir -p "$BUILD_DIR"
@@ -49,22 +49,23 @@ mkdir -p "$CACHE_DIR"
 cd "$BUILD_DIR"
 
 if [ ! -e Gemfile.lock ]; then
-    echo "No Gemfile.lock. Check it into your repository."
+    echo "No Gemfile.lock. Check it into your repository." | indent
     exit 1
 fi
 
 if [ -e vendor/bundle ]; then
-    echo "Don't check in your vendor/bundle directory."
+    echo "Don't check in your vendor/bundle directory." | indent
     rm -rf vendor/bundle
 fi
 
-if [ -e .ruby-version ]; then
-    ruby_version="$(< .ruby-version)"
-    if echo "$ruby_version" | egrep -q '^[[:digit:]]'; then
-        ruby_version="ruby-$ruby_version"
-    fi
+say "Using bundler $BUNDLER_VERSION"
+bundler_tmp="$(mktemp -d bundler.XXXXXXXX)"
+unpack_url "$VENDOR_URL/bundler-$BUNDLER_VERSION.tgz" "$bundler_tmp"
+bundle_platform_ruby="$(GEM_PATH="$bundler_tmp" "$bundler_tmp/gems/bundler-$BUNDLER_VERSION/bin/bundle_ruby")"
+if echo "$bundle_platform_ruby" | egrep -q '^No ruby'; then
+    ruby_version="ruby-1.9.3"
 else
-    ruby_version="ruby-2.0.0"
+    ruby_version="$(echo -n $bundle_platform_ruby | tr -s '[[:space:]]' '-')"
 fi
 
 say "Using $ruby_version"
@@ -78,10 +79,10 @@ export LANG=\${LANG:-en_US.UTF-8}
 export PATH="\$HOME/bin:\$HOME/$bundle_base/bin:\$HOME/vendor/$ruby_version/bin:\$PATH"
 export RACK_ENV=\${RACK_ENV:-production}
 EOF
-export GEM_PATH="$BUILD_DIR/$bundle_base:$GEM_PATH"
-export PATH="$BUILD_DIR/bin:$BUILD_DIR/$bundle_base/bin:$BUILD_DIR/vendor/$ruby_version/bin:$PATH"
+export GEM_PATH="$bundler_tmp:$BUILD_DIR/$bundle_base:$GEM_PATH"
+export PATH="$bundler_tmp/bin:$BUILD_DIR/bin:$BUILD_DIR/$bundle_base/bin:$BUILD_DIR/vendor/$ruby_version/bin:$PATH"
 
-say "Using bundler $BUNDLER_VERSION"
+say "Installing dependencies"
 cache_load .bundle
 cache_load vendor
 mkdir -p vendor/buildpack
@@ -93,9 +94,6 @@ if [ -e vendor/buildpack/ruby_v ] && ! cmp --quiet vendor/buildpack/ruby_v{,.new
     rm -rf vendor/bundle
 fi
 mv vendor/buildpack/ruby_v{.new,}
-unpack_url "$VENDOR_URL/bundler-$BUNDLER_VERSION.tgz" "$bundle_base"
-
-say "Installing dependencies"
 bundle install --without development:test --path vendor/bundle --no-clean | indent
 rm -rf "$bundle_base/doc" "$bundle_base/bundler-$BUNDLER_VERSION.gem"
 cache_store .bundle
