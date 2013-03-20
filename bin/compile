@@ -15,6 +15,15 @@ say() {
     echo "-----> $*"
 }
 
+warn() {
+    echo >&2 " !     $*"
+}
+
+error() {
+    warn "$*"
+    exit 1
+}
+
 indent() {
     sed -u 's/^/       /'
 }
@@ -26,8 +35,7 @@ unpack_url() {
     mkdir -p "$path"
 
     if ! curl --fail --retry 3 --silent -o - "$url" | tar -C "$path" -zxf -; then
-        echo "Fetching and unpacking \"$url\" to \"$path\" failed"
-        exit 1
+        error "Fetching and unpacking \"$url\" to \"$path\" failed."
     fi
 }
 
@@ -51,12 +59,11 @@ mkdir -p "$CACHE_DIR"
 cd "$BUILD_DIR"
 
 if [ ! -e Gemfile.lock ]; then
-    echo "No Gemfile.lock. Check it into your repository." | indent
-    exit 1
+    error "No Gemfile.lock. Check it into your repository."
 fi
 
 if [ -e vendor/bundle ]; then
-    echo "Don't check in your vendor/bundle directory." | indent
+    warn "Don't check your vendor/bundle directory into your repository."
     rm -rf vendor/bundle
 fi
 
