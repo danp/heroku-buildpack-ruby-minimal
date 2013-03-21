@@ -112,6 +112,7 @@ cache_store .bundle
 cache_store vendor/buildpack
 cache_store vendor/bundle
 rm -rf "$bundle_base/cache"
+find "$bundle_base/bundler/gems" -type d -name .git -print0 | xargs -0 rm -rf
 
 say "Cleaning cache"
 bundle clean | indent
