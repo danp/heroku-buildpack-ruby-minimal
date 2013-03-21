@@ -88,8 +88,8 @@ export LANG=\${LANG:-en_US.UTF-8}
 export PATH="\$HOME/bin:\$HOME/$bundle_base/bin:\$HOME/vendor/$ruby_version/bin:\$PATH"
 export RACK_ENV=\${RACK_ENV:-production}
 EOF
-export GEM_PATH="$bundler_tmp:$BUILD_DIR/$bundle_base:$GEM_PATH"
-export PATH="$bundler_tmp/bin:$BUILD_DIR/bin:$BUILD_DIR/$bundle_base/bin:$BUILD_DIR/vendor/$ruby_version/bin:$PATH"
+export GEM_PATH="$BUILD_DIR/$bundle_base:$GEM_PATH"
+export PATH="$BUILD_DIR/bin:$BUILD_DIR/$bundle_base/bin:$BUILD_DIR/vendor/$ruby_version/bin:$PATH"
 
 say "Installing dependencies"
 cache_load .bundle
@@ -103,6 +103,9 @@ if [ -e vendor/buildpack/ruby_v ] && ! cmp --quiet vendor/buildpack/ruby_v{,.new
     rm -rf vendor/bundle
 fi
 mv vendor/buildpack/ruby_v{.new,}
+rm -rf "$bundle_base/gems/bundler-$BUNDLER_VERSION"
+cp -a "$bundler_tmp/." "$bundle_base"
+rm -rf "$bundle_base/bundler-$BUNDLER_VERSION.gem"
 bundle install --without development:test --path vendor/bundle --no-clean | indent
 rm -rf "$bundle_base/doc"
 cache_store .bundle
