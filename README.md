@@ -23,7 +23,7 @@ $ heroku config:set BUILDPACK_URL=https://codon-buildpacks.s3.amazonaws.com/buil
 1. set up `.profile.d/ruby.sh` with `GEM_PATH`, `LANG`, `PATH`, and `RACK_ENV` (defaults to `production`, can be overidden)
 1. remove the cached bundle if the ruby version has changed
 1. `bundle install`, using the cached bundle (inside the [`$CACHE_DIR`](https://devcenter.heroku.com/articles/buildpack-api#caching)) if available
-1. `bundle clean` to save space
+1. `bundle clean` and [remove `.git` directories](https://github.com/heroku/heroku-buildpack-ruby/issues/76) to save space
 
 It supports the same ruby versions as the official ruby buildpack, except for jruby for now. You can see a list [here](https://devcenter.heroku.com/articles/ruby-support#ruby-versions).
 
