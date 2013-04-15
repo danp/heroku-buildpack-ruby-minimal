@@ -103,6 +103,7 @@ if [ -e vendor/buildpack/ruby_v ] && ! cmp --quiet vendor/buildpack/ruby_v{,.new
     rm -rf vendor/bundle
 fi
 mv vendor/buildpack/ruby_v{.new,}
+mkdir -p "$bundle_base"
 rm -rf "$bundle_base/gems/bundler-$BUNDLER_VERSION"
 cp -a "$bundler_tmp/." "$bundle_base"
 rm -rf "$bundle_base/bundler-$BUNDLER_VERSION.gem"
