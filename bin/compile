@@ -109,9 +109,6 @@ cp -a "$bundler_tmp/." "$bundle_base"
 rm -rf "$bundle_base/bundler-$BUNDLER_VERSION.gem"
 bundle install --without development:test --path vendor/bundle --no-clean | indent
 rm -rf "$bundle_base/doc"
-cache_store .bundle
-cache_store vendor/buildpack
-cache_store vendor/bundle
 rm -rf "$bundle_base/cache"
 if [ -d "$bundle_base/bundler/gems" ]; then
     find "$bundle_base/bundler/gems" -type d -name .git -print0 | xargs -0 rm -rf
@@ -119,5 +116,9 @@ fi
 
 say "Cleaning cache"
 bundle clean | indent
+
+cache_store .bundle
+cache_store vendor/buildpack
+cache_store vendor/bundle
 
 rm -rf "$bundler_tmp"
