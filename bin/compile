@@ -81,7 +81,7 @@ say "Using $ruby_version"
 unpack_url "$VENDOR_URL/$ruby_version.tgz" "vendor/$ruby_version"
 ruby_exe="$(find vendor/$ruby_version -name ruby -type f)"
 bundle_base="$("$ruby_exe" -e "require 'rbconfig';puts \"vendor/bundle/#{RUBY_ENGINE}/#{RbConfig::CONFIG['ruby_version']}\"")"
-mkdir .profile.d
+mkdir -p .profile.d
 cat > .profile.d/ruby.sh <<EOF
 export GEM_PATH="\$HOME/$bundle_base:\$GEM_PATH"
 export LANG=\${LANG:-en_US.UTF-8}
