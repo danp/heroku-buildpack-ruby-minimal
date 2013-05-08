@@ -29,7 +29,7 @@ It supports the same ruby versions as the official ruby buildpack, except for jr
 
 ## What it does not do
 
-* binstubs: you must `bundle exec ...` to use the bundle
+* binstubs: you must `bundle exec ...` to use the bundle, additionally your app's `bin/` directory is not in `$PATH`
 * add default addons: the official ruby buildpack will add a database if you have `pg` in your bundle
 * specify default processes types: the official ruby buildpack will set defaults for `web`, `rake`, and `console`
 * rails assets stuff: the official ruby buildpack will install node if necessary and try to run `rake assets:precompile`
