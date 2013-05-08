@@ -7,7 +7,7 @@ This is a [Heroku Buildpack](https://devcenter.heroku.com/articles/buildpacks) f
 For a new app:
 
 ```bash
-$ heroku create --buildpack dpiddy/ruby
+$ heroku create --buildpack https://codon-buildpacks.s3.amazonaws.com/buildpacks/dpiddy/ruby.tgz
 ```
 
 For an existing app:
