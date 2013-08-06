@@ -153,6 +153,9 @@ rm -rf "$bundle_base/cache"
 if [ -d "$bundle_base/bundler/gems" ]; then
     find "$bundle_base/bundler/gems" -type d -name .git -print0 | xargs -0 rm -rf
 fi
+for ext_makefile in $(find "$bundle_base" \( -path "*/gems/*/ext/Makefile" -o -path "*/gems/*/ext/*/Makefile" \)); do
+    (cd "$(dirname "$ext_makefile")" && make clean) >/dev/null 2>&1 || true
+done
 
 cache_store .bundle
 cache_store vendor/buildpack
