@@ -17,8 +17,10 @@ BUNDLER_VERSION="1.3.2"
 #   2: Change in `bundle install` environment to help nokogiri know to not compile
 #      its own libxml and libxslt
 #      ref https://github.com/heroku/heroku-buildpack-ruby/pull/124
+#   3: Undo cleaning of `ext` directories because gems such as oj expect `ext` to
+#      be usable as part of the require path.
 #
-BUILDPACK_REVISION="2"
+BUILDPACK_REVISION="3"
 
 BUILD_DIR="$1"
 CACHE_DIR="$2"
@@ -153,9 +155,6 @@ rm -rf "$bundle_base/cache"
 if [ -d "$bundle_base/bundler/gems" ]; then
     find "$bundle_base/bundler/gems" -type d -name .git -print0 | xargs -0 rm -rf
 fi
-for ext_makefile in $(find "$bundle_base" \( -path "*/gems/*/ext/Makefile" -o -path "*/gems/*/ext/*/Makefile" \)); do
-    (cd "$(dirname "$ext_makefile")" && make clean) >/dev/null 2>&1 || true
-done
 
 cache_store .bundle
 cache_store vendor/buildpack
