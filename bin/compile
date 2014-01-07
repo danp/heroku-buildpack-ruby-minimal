@@ -149,7 +149,7 @@ rm -rf "$bundle_base/gems/bundler-$BUNDLER_VERSION"
 cp -a "$bundler_tmp/." "$bundle_base"
 rm -rf "$bundle_base/bundler-$BUNDLER_VERSION.gem"
 NOKOGIRI_USE_SYSTEM_LIBRARIES=true \
-    bundle install --without development:test --path vendor/bundle --clean | indent
+    bundle install --deployment --without development:test --path vendor/bundle --clean | indent
 rm -rf "$bundle_base/doc"
 rm -rf "$bundle_base/cache"
 if [ -d "$bundle_base/bundler/gems" ]; then
