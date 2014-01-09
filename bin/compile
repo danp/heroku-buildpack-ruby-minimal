@@ -6,7 +6,7 @@ set -o pipefail
 unset GIT_DIR
 
 VENDOR_URL="https://heroku-buildpack-ruby.s3.amazonaws.com"
-BUNDLER_VERSION="1.3.2"
+BUNDLER_VERSION="1.5.2"
 
 # BUILDPACK_REVISION is used to clear the bundle when something about how we manage
 # the bundle changes.
@@ -149,7 +149,7 @@ rm -rf "$bundle_base/gems/bundler-$BUNDLER_VERSION"
 cp -a "$bundler_tmp/." "$bundle_base"
 rm -rf "$bundle_base/bundler-$BUNDLER_VERSION.gem"
 NOKOGIRI_USE_SYSTEM_LIBRARIES=true \
-    bundle "_${BUNDLER_VERSION}_" install --deployment --without development:test --path vendor/bundle --clean | indent
+    bundle "_${BUNDLER_VERSION}_" install --deployment --jobs 4 --without development:test --path vendor/bundle --clean | indent
 rm -rf "$bundle_base/doc"
 rm -rf "$bundle_base/cache"
 if [ -d "$bundle_base/bundler/gems" ]; then
