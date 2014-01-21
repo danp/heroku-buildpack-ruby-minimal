@@ -102,7 +102,7 @@ export LANG=\${LANG:-en_US.UTF-8}
 export PATH="\$HOME/$bundle_base/bin:\$HOME/vendor/$ruby_version/bin:\$PATH"
 export RACK_ENV=\${RACK_ENV:-production}
 EOF
-export GEM_PATH="$BUILD_DIR/$bundle_base:$GEM_PATH"
+export GEM_PATH="$BUILD_DIR/$bundle_base"
 export PATH="$BUILD_DIR/bin:$BUILD_DIR/$bundle_base/bin:$BUILD_DIR/vendor/$ruby_version/bin:$PATH"
 
 say "Installing dependencies"
