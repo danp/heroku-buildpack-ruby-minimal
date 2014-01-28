@@ -99,7 +99,7 @@ mkdir -p .profile.d
 cat > .profile.d/ruby.sh <<EOF
 export GEM_PATH="\$HOME/$bundle_base:\$GEM_PATH"
 export LANG=\${LANG:-en_US.UTF-8}
-export PATH="\$HOME/$bundle_base/bin:\$HOME/vendor/$ruby_version/bin:\$PATH"
+export PATH="\$HOME/$bundle_base/bin:\$HOME/vendor/bundle/bin:\$HOME/vendor/$ruby_version/bin:\$PATH"
 export RACK_ENV=\${RACK_ENV:-production}
 EOF
 export GEM_PATH="$BUILD_DIR/$bundle_base"
